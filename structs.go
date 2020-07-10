@@ -8,9 +8,20 @@ type Text struct {
 	X []byte
 }
 
-/*type JsonData struct {
-	
-}*/
+type Rates struct {
+	XMLName xml.Name `xml:"rates"`
+	Item    struct {
+		From      string `xml:"from"`
+		To        string `xml:"to"`
+		In        string `xml:"in"`
+		Out       string `xml:"out"`
+		Amount    string `xml:"amount"`
+		Minamount string `xml:"minamount"`
+		Maxamount string `xml:"maxamount"`
+		Param     string `xml:"param"`
+		City      string `xml:"city"`
+	} `xml:"item"`
+}
 
 // конструктор для кодируемого текста
 func NewText(

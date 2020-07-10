@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+
+	"encoding/xml"
 )
 
 // сохраняем в памяти
 var TextForEncrypt map[string]*Text
-//var JsonFromXml map[string]*JsonData
+//var JsonFromXml map[string]*Rates
 
 func indexHendler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/index.html")
@@ -47,7 +49,7 @@ func encryptHendler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-/*func getjsonHendler(w http.ResponseWriter, r *http.Request) {
+/*func coursesHendler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/write.html")
 	if err != nil{
 		fmt.Fprintf(w, err.Error()) // возврат ошибки в браузер
@@ -59,15 +61,14 @@ func encryptHendler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	TextForEncrypt = make(map[string]*Text, 0)
-	//JsonFromXml = make(map[string]*JsonData, 0)
+	//JsonFromXml = make(map[string]*Rates, 0)
 	
 	fmt.Println("---listening on port :8000")
 
 	http.HandleFunc("/", indexHendler)
 	http.HandleFunc("/encrypt", encryptHendler)
-	//http.HandleFunc("/getjsonfromxml", getjsonHendler)
+	//http.HandleFunc("/courses", coursesHendler)
 	
 	http.ListenAndServe(":8000", nil)
-
 
 }
