@@ -1,0 +1,20 @@
+{{ define "write" }}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>write</title>
+</head>
+<body>
+
+    <form name="test">
+        {{ range $key, $value := . }}
+            <output>{{ $value.X }}</output>
+        {{ end }}
+    </form>
+
+
+</body>
+</html>
+
+{{ end }}

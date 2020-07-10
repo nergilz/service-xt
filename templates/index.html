@@ -1,0 +1,33 @@
+{{ define "index" }}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>index</title>
+</head>
+<body>
+
+    <h1>service-ende</h1>
+
+    <li><a href="/getjsonfromxml">Get json from xml</a></li>
+
+    <form name="test" method="post" action="/encrypt">
+        <p><b>secretkey</b><br>
+            <input type="text" size="50" name="secretkey">
+        </p>
+        <p><b>content:</b><Br>
+            <textarea cols="50" rows="9" name="content"></textarea></p>
+        </p>
+        <p>
+            {{ range $key, $value := . }}
+            <output>{{ $value.X }}</output>
+            {{ end }}
+        </p>
+        <p><input type="submit" value="submint">
+        <input type="reset" value="reset"></p>
+    </form>
+
+</body>
+</html>
+
+{{ end }}
