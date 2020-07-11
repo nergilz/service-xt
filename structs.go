@@ -5,10 +5,10 @@ import (
 )
 
 type Text struct {
-	Id string
-	Secretkey string
-	Content string
-	X []byte
+    Id string
+    Secretkey string
+    Content string
+    X string
 }
 
 type Rates struct {
@@ -27,11 +27,8 @@ type Item struct {
         City      string `xml:"city"`
 }
 
+
 // конструктор для кодируемого текста
-func NewText(
-	id string, 
-	secretkey string, 
-	content string, 
-	x []byte) *Text { // возвращаем указатель на Text
-	return &Text{id, secretkey, content, x}
+func NewText(id, secretkey, content, x string) *Text { // возвращаем указатель на Text
+    return &Text{id, secretkey, content, x}
 }

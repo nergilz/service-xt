@@ -7,47 +7,81 @@ import (
     "encoding/xml"
     "encoding/json"
     "io/ioutil"
+    "log"
+    b64 "encoding/base64"
 )
 
-// сохраняем в памяти
-var TextForEncrypt map[string]*Text
+var EncryptText map[string]*Text // сохраняем в памяти
 
+func main() {
 
-func indexHendler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/index.html")
-	if err != nil{
-		fmt.Fprintf(w, err.Error()) // возврат ошибки в браузер
-	}
+    EncryptText = make(map[string]*Text, 0)
+    fmt.Println("---listening on port :8000")
 
-	fmt.Println(TextForEncrypt) // вывод в консоль при входе в index
-
-	t.ExecuteTemplate(w, "index", TextForEncrypt) // вывод на страницу
+    http.HandleFunc("/", indexHendler)
+    http.HandleFunc("/encrypt", encryptHendler)
+    http.HandleFunc("/decrypt", decryptHendler)
+    http.HandleFunc("/courses", coursesHendler)
+    
+    http.ListenAndServe(":8000", nil)
 }
 
+func indexHendler(w http.ResponseWriter, r *http.Request) {
+    t, err := template.ParseFiles("templates/index.html")
+    if err != nil{
+        fmt.Fprintf(w, err.Error()) // возврат ошибки в браузер
+    }
 
-func writeHendler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/write.html")
-	if err != nil{
-		fmt.Fprintf(w, err.Error()) // возврат ошибки в браузер
-	}
+    fmt.Println(EncryptText) // вывод в консоль при входе в index
 
-	t.ExecuteTemplate(w, "write", nil)
+    t.ExecuteTemplate(w, "index", EncryptText) // вывод на страницу
 }
 
 
 func encryptHendler(w http.ResponseWriter, r *http.Request) {
-	//id := GenerateId()
-	id := r.FormValue("id")
-	secretkey := r.FormValue("secretkey")
-	content := r.FormValue("content")
+    id := r.FormValue("id")
+    secretkey := r.FormValue("secretkey")
+    content := r.FormValue("content")
 
-	x := Encryptor(secretkey, content)
+    key := []byte(secretkey)
+    plaintext := []byte(content)
 
-	post := NewText(id, secretkey, content, x)
-	TextForEncrypt[post.Id] = post // записываем post в map
-
-	http.Redirect(w, r, "/", 302)
+    ciphertextenc, err := Encryptor(key, plaintext)
+    if err != nil {
+        log.Fatal(err)
+    }
+    //s := string(ciphertextenc)
+    //fmt.Println(s)
+    sEnc := b64.StdEncoding.EncodeToString(ciphertextenc)
+    fmt.Println(sEnc)
+    post := NewText(id, secretkey, content, sEnc )
+    EncryptText[post.Id] = post // записываем post в map
+    http.Redirect(w, r, "/", 302)
 }
+
+func decryptHendler(w http.ResponseWriter, r *http.Request) {
+    id := r.FormValue("id")
+    secretkey := r.FormValue("secretkey")
+    content := r.FormValue("content")
+    fmt.Println(content)
+
+    sDec, _ := b64.StdEncoding.DecodeString(content)
+    text := []byte(sDec)
+    key := []byte(secretkey)
+
+    result, err := Decryptor(key, text)
+    if err != nil {
+        log.Fatal(err)
+    }
+    s := string(result)
+    fmt.Println(s)
+
+    post := NewText(id, secretkey, content, s )
+    EncryptText[post.Id] = post
+    http.Redirect(w, r, "/", 302)
+
+}
+
 
 func coursesHendler(w http.ResponseWriter, r *http.Request) {
 
@@ -87,16 +121,4 @@ func coursesHendler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     w.Write(jsonData)
     fmt.Println("---return json: /courses---")
-}
-
-
-func main() {
-	TextForEncrypt = make(map[string]*Text, 0)
-	fmt.Println("---listening on port :8000")
-
-	http.HandleFunc("/", indexHendler)
-	http.HandleFunc("/encrypt", encryptHendler)
-	http.HandleFunc("/courses", coursesHendler)
-	
-	http.ListenAndServe(":8000", nil)
 }
