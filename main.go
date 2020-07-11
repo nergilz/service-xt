@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"html/template"
-	"net/http"
-
-	"encoding/xml"
+    "fmt"
+    "html/template"
+    "net/http"
+    "encoding/xml"
+    "encoding/json"
+    "io/ioutil"
 )
 
 // сохраняем в памяти
 var TextForEncrypt map[string]*Text
-//var JsonFromXml map[string]*Rates
+
 
 func indexHendler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/index.html")
@@ -48,27 +49,54 @@ func encryptHendler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 302)
 }
 
+func coursesHendler(w http.ResponseWriter, r *http.Request) {
 
-/*func coursesHendler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/write.html")
-	if err != nil{
-		fmt.Fprintf(w, err.Error()) // возврат ошибки в браузер
-	}
+    xmlResp, err := http.Get("https://test.cryptohonest.ru/request-exportxml.xml")
+    if err != nil {
+        fmt.Println("---get xml error : ", err)
+        return
+    }
+    xmlData, _ := ioutil.ReadAll(xmlResp.Body)
 
-	t.ExecuteTemplate(w, "write", JsonFromXml) // вывод на страницу
-}*/
+    var rates Rates
+    xml.Unmarshal(xmlData, &rates)
+
+    // Convert to JSON
+    var item Item
+    var items []Item
+
+    for _, value := range rates.Items {
+        item.From = value.From
+        item.To = value.To
+        item.In = value.In
+        item.Out = value.Out
+        item.Amount = value.Amount
+        item.Minamount = value.Minamount
+        item.Maxamount = value.Maxamount
+        item.Param = value.Param
+        item.City = value.City
+
+        items = append(items, item)
+    }
+
+    jsonData, err := json.MarshalIndent(items, "", " ")
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.Write(jsonData)
+    fmt.Println("---return json: /courses---")
+}
 
 
 func main() {
 	TextForEncrypt = make(map[string]*Text, 0)
-	//JsonFromXml = make(map[string]*Rates, 0)
-	
 	fmt.Println("---listening on port :8000")
 
 	http.HandleFunc("/", indexHendler)
 	http.HandleFunc("/encrypt", encryptHendler)
-	//http.HandleFunc("/courses", coursesHendler)
+	http.HandleFunc("/courses", coursesHendler)
 	
 	http.ListenAndServe(":8000", nil)
-
 }

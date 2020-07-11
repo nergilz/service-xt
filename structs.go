@@ -1,6 +1,9 @@
 package main
 
-// модель
+import (
+    "encoding/xml"
+)
+
 type Text struct {
 	Id string
 	Secretkey string
@@ -9,18 +12,19 @@ type Text struct {
 }
 
 type Rates struct {
-	XMLName xml.Name `xml:"rates"`
-	Item    struct {
-		From      string `xml:"from"`
-		To        string `xml:"to"`
-		In        string `xml:"in"`
-		Out       string `xml:"out"`
-		Amount    string `xml:"amount"`
-		Minamount string `xml:"minamount"`
-		Maxamount string `xml:"maxamount"`
-		Param     string `xml:"param"`
-		City      string `xml:"city"`
-	} `xml:"item"`
+    XMLName xml.Name `xml:"rates"`
+    Items [] Item `xml:"item"`
+}
+type Item struct {
+        From      string `xml:"from"`
+        To        string `xml:"to"`
+        In        string `xml:"in"`
+        Out       string `xml:"out"`
+        Amount    string `xml:"amount"`
+        Minamount string `xml:"minamount"`
+        Maxamount string `xml:"maxamount"`
+        Param     string `xml:"param"`
+        City      string `xml:"city"`
 }
 
 // конструктор для кодируемого текста
